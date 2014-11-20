@@ -66,15 +66,16 @@ def update(index, command, content):
     fileObject.close()
     line = lines[index]
 
-    startIndex = line.index(command)
-    endIndex = startIndex + line[startIndex + 1:].find("-")
-
-    lineStartPart = line[:startIndex]
+    indexStart = line.index(command)
+    indexEnd = indexStart + line[indexStart + 1:].find("-")
+    lineStartPart = line[:indexStart]
+    print lineStartPart
     lineUpdatedPart = "%s %s " % (command, content)
-    lineEndPart = line[endIndex:]
+    print lineUpdatedPart
+    lineEndPart = line[indexEnd:]
+    print lineEndPart
     newLine = "%s%s%s" % (lineStartPart, lineUpdatedPart, lineEndPart)
     lines[index] = newLine
-
     fileObject = open("todos.txt", "w")
     for line in lines:
         fileObject.write(line)

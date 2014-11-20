@@ -1,5 +1,1 @@
--t bugun pamuk kalbinden -p oncelikli -d senide seviyorum -subtodo bu sub todoları guzel yaptık
--t pamuk kalbinden optum -p senden once -d hadi cani -subtodo bu sub todoları guzel yaptık
--t karpuz getir yiyelim -p bence bu is bitti -d yok canim sendededed -subtodo bu sub todoları guzel yaptık
--t sanirim iyi bir yoldayim -p aha da geldim :))  -d herhalde sorunu cozdum -subtodo bu sub todoları guzel yaptık
--t yeni bir gun basliyor -s open -p oncelikli -d diger calismaya hazirlik
+last
