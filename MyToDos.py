@@ -45,7 +45,7 @@ def listToDos(todoList):
 def detailedList(todoList):
     for todo in todoList:
         print todoList.index(todo), "%s - %s" % (todo["t"], todo["p"])
-        print "     %s" % todo["d"]
+        print "description: %s" % todo["d"]
 
 
 def remove(index):

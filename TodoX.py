@@ -38,5 +38,3 @@ if a.add:
     for key, val in addTodo().items():
         w.writerow([key, val])
     print "all done"
-
-

@@ -1,1 +1,5 @@
-last
+-t deneme todo -s yapilmadi -p onceliklirfrefr -d dsfds
+-t deneme todo -s yapilmadi -p onceliklirfrefr -d dsfds
+-t deneme todo -s yapilmadi -p onceliklirfrefr -d dsfds
+-t guvercinlerin yolunmasi -d guvercinleri tek tek yakalayip yolacagimki ucup kacmasinlar -p Onemli
+-t deneme todo -s yapilmadi -p onceliklirfrefr -d -d parametresinin kaldirilmasi
