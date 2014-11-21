@@ -4,10 +4,12 @@ import csv
 parser = argparse.ArgumentParser(prog="MYTODO",
                                  description="Todo Management Ssytem",
                                  epilog="A new look to time management")
-parser.add_argument("-a", "--add", help="add new todo", action="store_true")
-parser.add_argument("-t", "--title", help="title of todo", type=str)
+parser.add_argument("-a", "--add", help="add new todo",
+                    action="store_true")
+parser.add_argument("-t", "--title", help="title of todo", type=str,
+                    nargs='+')
 parser.add_argument("-d", "--description",
-                    help="description of todo", type=str)
+                    help="description of todo", type=str, nargs='+')
 parser.add_argument("-p", "--priority", help="priority of todo", type=str)
 parser.add_argument("-s", "--status", help="status of todo", type=str)
 parser.add_argument("--dd", help="duedate of todo", type=str)
@@ -31,10 +33,21 @@ def addTodo():
     return todo
 
 
+def readFile():
+    reader = csv.reader(open('todos.csv', 'rb'))
+    todoDict = dict(x for x in reader)
+    return todoDict
+
+
+def writeFile():
+    writer = csv.writer(open('todos.csv', 'a'))
+    for key, value in addTodo().items():
+        writer.writerow([key, value])
+
 #deneme
 if a.add:
-    print addTodo()
-    w = csv.writer(open("todo.csv", "w"))
-    for key, val in addTodo().items():
-        w.writerow([key, val])
-    print "all done"
+    writeFile()
+    print readFile()
+
+
+
