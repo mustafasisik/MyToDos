@@ -79,10 +79,7 @@ def listTodos():
 
 def remove(index):
     todoList = readFile()
-    try:
-        todoList.remove(todoList[index])
-    except ValueError:
-        print "there is no such todo has index %s" % index
+    todoList.remove(todoList[index])
     writeFile(todoList)
     print "todo removed at index %d" % index
 
