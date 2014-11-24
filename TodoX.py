@@ -1,4 +1,3 @@
-import os
 import argparse
 import cPickle as pkl
 
@@ -16,17 +15,19 @@ parser.add_argument("-s", "--status", help="status of todo", type=str)
 parser.add_argument("-e", "--enddate", help="enddate of todo", type=str)
 parser.add_argument("-l", "--list", help="lists all todos",
                     action="store_true")
-parser.add_argument("-ld", "--detailedlist", help="lists details of all todos",
+parser.add_argument("-ld", help="lists details of all todos",
                     action="store_true")
 parser.add_argument("-u", "--update", help="updates a todo by index",
                     type=int)
 parser.add_argument("-r", "--remove", dest="remove",
                     help="remove a todo by index", type=int)
+parser.add_argument("-c", "--create", help="creates a new todo program",
+                    action="store_true")
 a = parser.parse_args()
 
 
-def writeFile(todo):
-    pkl.dump(todo, open("todos.p", "wb"))
+def writeFile(todoList):
+    pkl.dump(todoList, open("todos.p", "wb"))
 
 
 def readFile():
@@ -34,10 +35,7 @@ def readFile():
 
 
 def addTodo():
-    if os.path.exists("todos.p"):
-        todoList = readFile()
-    else:
-        todoList = []
+    todoList = readFile()
     todo = {}
     if a.title:
         todo["title"] = a.title
@@ -51,34 +49,39 @@ def addTodo():
         todo["enddate"] = a.enddate
     todoList.append(todo)
     writeFile(todoList)
-    print "new to do added to index %d" % (len(todoList) - 1)
+    print "new to do added"
+
+
+def create():
+    todoList = []
+    todo = {}
+    if a.title:
+        todo["title"] = a.title
+    if a.status:
+        todo["status"] = a.status
+    if a.description:
+        todo["description"] = a.description
+    if a.priority:
+        todo["priority"] = a.priority
+    if a.enddate:
+        todo["enddate"] = a.enddate
+    todoList.append(todo)
+    writeFile(todoList)
+    print "new todo program created"
 
 
 def listTodos():
     todoList = readFile()
     print "title - status"
-    if todoList == []:
-            print "Todolist is empty"
     for todo in todoList:
         print "%s - %s " % (" ".join(todo["title"]), todo["status"])
 
 
-def detailedList():
-    todoList = readFile()
-    print"title - status"
-    for todo in todoList:
-        print "\n%s - %s " % (" ".join(todo["title"]), todo["status"])
-        print "description: %s" % " ".join(todo["description"])
-
-
 def remove(index):
     todoList = readFile()
-    if len(todoList) > index:
-        todoList.remove(todoList[index])
-        writeFile(todoList)
-        print "todo removed at index %d" % index
-    else:
-        print "There is no todo has index %d" % index
+    todoList.remove(todoList[index])
+    writeFile(todoList)
+    print "todo removed at index %d" % index
 
 
 def update(index):
@@ -96,7 +99,9 @@ def update(index):
     writeFile(todoList)
     print "todo at index %s is updated" % index
 
-if a.add:
+if a.create:
+    create()
+elif a.add:
     addTodo()
 elif a.list:
     listTodos()
@@ -104,5 +109,6 @@ elif type(a.remove) == int:
     remove(a.remove)
 elif type(a.update) == int:
     update(a.update)
-elif a.detailedlist:
-    detailedList()
+
+
+print a.remove
