@@ -106,17 +106,21 @@ def update(index):
 
 
 if __name__ == "__main__":
+    modified = False
     if a.add:
         td = addTodo()
-        writeFile(td)
+        modified = True
     elif a.remove is not None:
         td = remove(a.remove)
-        writeFile(td)
+        modified = True
     elif a.update is not None:
         td = update(a.update)
-        writeFile(td)
+        modified = True
     if a.list:
         listTodos()
     elif a.detailedlist:
         detailedList()
+
+    if modified is True:
+        writeFile(td)
 
