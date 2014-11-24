@@ -1,2 +1,2 @@
-writefile tekrar tekrar çağırma
-getattr kullan
+do not call writeFile function again and again
+use getattr for args to use dictionary
