@@ -36,7 +36,9 @@ class TodoManager:
         print "title - status"
         i = 1
         for todo in todoList:
-            print "\n%d- %s - %s " % (i, " ".join(todo["title"]), todo["status"])
+            t = " ".join(todo["title"])
+            s = todo["status"]
+            print "\n%d- %s - %s " % (i, t, s)
             i += 1
 
     def detailedList(self):
@@ -44,7 +46,9 @@ class TodoManager:
         print"title - status"
         i = 1
         for todo in todoList:
-            print "\n%d- %s - %s " % (i, " ".join(todo["title"]), todo["status"])
+            t = " ".join(todo["title"])
+            s = todo["status"]
+            print "\n%d- %s - %s " % (i, t, s)
             print "    : %s" % " ".join(todo["description"])
             i += 1
 
@@ -55,7 +59,8 @@ class TodoManager:
             print "todo removed at index %d" % index
         else:
             print "There is no todo has index %d\n" \
-            "Index number should be between(0, %d)" % (index, (len(todoList)-1))
+                  "Index number should be"\
+                  "between(0, %d)" % (index, (len(todoList)-1))
         return todoList
 
     def update(self, index):
@@ -93,7 +98,13 @@ if __name__ == "__main__":
                         help="remove a todo by index", type=int)
     parser.add_argument("-c", "--create", help="creates a new todo program",
                         action="store_true")
-
+    subparsers = parser.add_subparsers(title="subcommands",
+                                       description="valid subcommands",
+                                       help="additional help")
+    subparsers.add_parser("addTodo")
+    subparsers.add_parser("listTodos")
+    subparsers.add_parser("listDetailed")
+    subparsers.add_parser("update")
 
     a = parser.parse_args()
 
