@@ -47,20 +47,21 @@ class TodoManager:
         i = 1
         for todo in todoList:
             t = " ".join(todo["title"])
-            s = todo["status"]
-            print "\n%d- %s - %s " % (i, t, s)
-            print "    : %s" % " ".join(todo["description"])
+            print "\n%d- %s - %s " % (i, t, todo["status"])
+            print "Desc: %s" % " ".join(todo["description"])
+            print "priority: %s" % todo["priority"]
+            print "enddate: %s" % todo["enddate"]
             i += 1
 
     def remove(self, index):
         todoList = self.readFile()
-        if len(todoList) > index:
-            todoList.pop(index)
+        if len(todoList) >= index:
+            todoList.pop(index-1)
             print "todo removed at index %d" % index
         else:
             print "There is no todo has index %d\n" \
                   "Index number should be"\
-                  "between(0, %d)" % (index, (len(todoList)-1))
+                  "between(0, %d)" % (index, len(todoList))
         return todoList
 
     def update(self, index):
@@ -68,7 +69,7 @@ class TodoManager:
         d = ["title", "status", "description", "priority", "enddate"]
         for key in d:
             if getattr(args, key):
-                todoList[index][key] = getattr(args, key)
+                todoList[index-1][key] = getattr(args, key)
         print "todo at index %s is updated" % index
         return todoList
 
@@ -95,18 +96,21 @@ if __name__ == "__main__":
     parser_addTodo.add_argument("-s", "--status", help="status of todo",
                                 type=str, default="Not done")
     parser_addTodo.add_argument("-e", "--enddate", help="enddate of todo",
-                                type=str)
+                                type=str, default="Not defined")
 
+    #lists todos
     parser_list = subparsers.add_parser("list", help="help for list todos")
     parser_list.add_argument("list", help="lists all todos",
                              action="store_true")
 
+    #detailed lists todos
     parser_detailedlist = subparsers.add_parser("detailedlist",
                                                 help="help for detailedlist")
     parser_detailedlist.add_argument("detailedlist",
                                      help="lists details of all todos",
                                      action="store_true")
 
+    #updating todo by argument
     parser_update = subparsers.add_parser("update",
                                           help="help for update todo")
     parser_update.add_argument("update",
@@ -114,17 +118,17 @@ if __name__ == "__main__":
     parser_update.add_argument("-t", "--title",
                                help="title of todo", type=str, nargs='+')
     parser_update.add_argument("-d", "--description",
-                               default=["No", "description"],
                                help="description of todo",
                                type=str, nargs='+')
     parser_update.add_argument("-p", "--priority",
                                help="priority of todo",
-                               type=str, default="important")
+                               type=str)
     parser_update.add_argument("-s", "--status", help="status of todo",
-                               type=str, default="Not done")
+                               type=str)
     parser_update.add_argument("-e", "--enddate", help="enddate of todo",
                                type=str)
 
+    #removing todo by index
     parser_remove = subparsers.add_parser("remove",
                                           help="help for remove todo")
     parser_remove.add_argument("remove", help="remove a todo by index",
