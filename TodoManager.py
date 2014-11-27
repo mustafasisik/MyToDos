@@ -130,24 +130,25 @@ if __name__ == "__main__":
     parser_remove.add_argument("remove", help="remove a todo by index",
                                type=int)
 
-args = parser.parse_args()
-modified = False
-if getattr(args, "title", None):
-    td = todomanager.add()
-    modified = True
-elif getattr(args, "remove", None) or getattr(args, "remove", None) == 0:
-    td = todomanager.remove(args.remove)
-    modified = True
-elif getattr(args, "update", None) or getattr(args, "update", None) == 0:
-    td = todomanager.update(args.update)
-    modified = True
-elif getattr(args, "list", None):
-    print "mystaa"
-    todomanager.list()
-elif getattr(args, "detailedlist", None):
-    todomanager.detailedList()
+    args = parser.parse_args()
 
+    modified = False
 
-if modified is True:
-    todomanager.writeFile(td)
+    if getattr(args, "title", None):
+        td = todomanager.add()
+        modified = True
+    elif getattr(args, "remove", None) or getattr(args, "remove", None) == 0:
+        td = todomanager.remove(args.remove)
+        modified = True
+    elif getattr(args, "update", None) or getattr(args, "update", None) == 0:
+        td = todomanager.update(args.update)
+        modified = True
+    elif getattr(args, "list", None):
+        print "mystaa"
+        todomanager.list()
+    elif getattr(args, "detailedlist", None):
+        todomanager.detailedList()
+
+    if modified is True:
+        todomanager.writeFile(td)
 
