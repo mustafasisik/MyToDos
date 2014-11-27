@@ -1,11 +1,26 @@
 # -*- coding: cp1254 -*-
+from __future__ import print_function
 import os
 import argparse
 import cPickle as pkl
+from functools import wraps
+
+""" bu fonksiyon çağrıldığında bir fonksiyon alır ve onun
+yerine inner function döner. parametre olarak aldığı fonksiyon
+eğer çağrılırsa bunun yerine inner function çalışır"""
 
 
-class TodoManager:
+def is_modified(f):
+    @wraps(f)
+    def innerFunction(instance, *args):
+        instance.modified = True
+        return f(instance, *args)
+    return innerFunction
+
+
+class TodoManager(object):
     def __init__(self, fileName):
+        self.modified = False
         self.fileName = fileName
 
     def writeFile(self, todoList):
@@ -22,59 +37,60 @@ class TodoManager:
                 todo[key] = getattr(args, key)
         return todo
 
+    @is_modified  # decorator
     def add(self):
         if os.path.exists(self.fileName):
             todoList = self.readFile()
         else:
             todoList = []
         todoList.append(self.create())
-        print "new to do added to index %d" % (len(todoList)-1)
+        print ("new to do added to index %d" % (len(todoList)-1))
         return todoList
 
     def list(self):
         todoList = self.readFile()
-        print "title - status"
+        print ("title - status")
         i = 1
         for todo in todoList:
             t = " ".join(todo["title"])
             s = todo["status"]
-            print "\n%d- %s - %s " % (i, t, s)
+            print ("\n%d- %s - %s " % (i, t, s))
             i += 1
 
     def detailedList(self):
         todoList = self.readFile()
-        print"title - status"
+        print ("title - status")
         i = 1
         for todo in todoList:
             t = " ".join(todo["title"])
-            print "\n%d- %s - %s " % (i, t, todo["status"])
-            print "Desc: %s" % " ".join(todo["description"])
-            print "priority: %s" % todo["priority"]
-            print "enddate: %s" % todo["enddate"]
+            print ("\n%d- %s - %s " % (i, t, todo["status"]))
+            print ("Desc: %s" % " ".join(todo["description"]))
+            print ("priority: %s" % todo["priority"])
+            print ("enddate: %s" % todo["enddate"])
             i += 1
 
+    @is_modified  # decorator
     def remove(self, index):
         todoList = self.readFile()
-        if len(todoList) >= index:
-            todoList.pop(index-1)
-            print "todo removed at index %d" % index
-        else:
-            print "There is no todo has index %d\n" \
-                  "Index number should be"\
-                  "between(0, %d)" % (index, len(todoList))
+        assert len(todoList) >= index,\
+            print("There is no todo has index %d\n"
+                  "Index number should be"
+                  "between(0, %d)" % (index, len(todoList)))
+        todoList.pop(index-1)
+        print ("todo removed at index %d" % index)
         return todoList
 
+    @is_modified  # decorator
     def update(self, index):
         todoList = self.readFile()
         d = ["title", "status", "description", "priority", "enddate"]
         for key in d:
             if getattr(args, key):
                 todoList[index-1][key] = getattr(args, key)
-        print "todo at index %s is updated" % index
+        print ("todo at index %s is updated" % index)
         return todoList
 
 if __name__ == "__main__":
-    todomanager = TodoManager("todos.p")
 
     parser = argparse.ArgumentParser(prog="MYTODO",
                                      description="Todo Management Ssytem",
@@ -135,24 +151,19 @@ if __name__ == "__main__":
                                type=int)
 
     args = parser.parse_args()
-
-    modified = False
+    todomanager = TodoManager("todos.p")
 
     if getattr(args, "title", None):
         td = todomanager.add()
-        modified = True
     elif getattr(args, "remove", None) or getattr(args, "remove", None) == 0:
         td = todomanager.remove(args.remove)
-        modified = True
     elif getattr(args, "update", None) or getattr(args, "update", None) == 0:
         td = todomanager.update(args.update)
-        modified = True
     elif getattr(args, "list", None):
-        print "mystaa"
         todomanager.list()
     elif getattr(args, "detailedlist", None):
         todomanager.detailedList()
 
-    if modified is True:
+    if todomanager.modified:
         todomanager.writeFile(td)
 
