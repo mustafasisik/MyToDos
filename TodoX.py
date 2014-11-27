@@ -1,3 +1,4 @@
+# -*- coding: cp1254 -*-
 import os
 import argparse
 import cPickle as pkl

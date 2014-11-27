@@ -14,24 +14,24 @@ class TodoManager:
     def readFile(self):
         return pkl.load(open(self.fileName, "rb"))
 
-    def createTodo(self):
+    def create(self):
         todo = {}
         d = ["title", "status", "description", "priority", "enddate"]
         for key in d:
-            if getattr(a, key):
-                todo[key] = getattr(a, key)
+            if getattr(args, key):
+                todo[key] = getattr(args, key)
         return todo
 
-    def addTodo(self):
+    def add(self):
         if os.path.exists(self.fileName):
             todoList = self.readFile()
         else:
             todoList = []
-        todoList.append(self.createTodo())
+        todoList.append(self.create())
         print "new to do added to index %d" % (len(todoList)-1)
         return todoList
 
-    def listTodos(self):
+    def list(self):
         todoList = self.readFile()
         print "title - status"
         i = 1
@@ -67,64 +67,87 @@ class TodoManager:
         todoList = self.readFile()
         d = ["title", "status", "description", "priority", "enddate"]
         for key in d:
-            if getattr(a, key):
-                todoList[index][key] = getattr(a, key)
+            if getattr(args, key):
+                todoList[index][key] = getattr(args, key)
         print "todo at index %s is updated" % index
         return todoList
 
 if __name__ == "__main__":
+    todomanager = TodoManager("todos.p")
+
     parser = argparse.ArgumentParser(prog="MYTODO",
                                      description="Todo Management Ssytem",
                                      epilog="A new look to time management")
-    parser.add_argument("-a", "--add", help="add new todo",
-                        action="store_true")
-    parser.add_argument("-t", "--title", help="title of todo", type=str,
-                        nargs='+')
-    parser.add_argument("-d", "--description", default=["No", "description"],
-                        help="description of todo", type=str, nargs='+')
-    parser.add_argument("-p", "--priority", help="priority of todo",
-                        type=str, default="important")
-    parser.add_argument("-s", "--status", help="status of todo",
-                        type=str, default="Not done")
-    parser.add_argument("-e", "--enddate", help="enddate of todo", type=str)
-    parser.add_argument("-l", "--list", help="lists all todos",
-                        action="store_true")
-    parser.add_argument("-ld", "--detailedlist",
-                        help="lists details of all todos",
-                        action="store_true")
-    parser.add_argument("-u", "--update", help="updates a todo by index",
-                        type=int)
-    parser.add_argument("-r", "--remove", dest="remove",
-                        help="remove a todo by index", type=int)
-    parser.add_argument("-c", "--create", help="creates a new todo program",
-                        action="store_true")
-    subparsers = parser.add_subparsers(title="subcommands",
-                                       description="valid subcommands",
-                                       help="additional help")
-    subparsers.add_parser("addTodo")
-    subparsers.add_parser("listTodos")
-    subparsers.add_parser("listDetailed")
-    subparsers.add_parser("update")
 
-    a = parser.parse_args()
+    subparsers = parser.add_subparsers(help="additional help")
 
-    todomanager = TodoManager("deneme.txt")
+    parser_addTodo = subparsers.add_parser("add", help="adds new todo")
 
-    modified = False
-    if a.add:
-        td = todomanager.addTodo()
-        modified = True
-    elif a.remove is not None:
-        td = todomanager.remove(a.remove)
-        modified = True
-    elif a.update is not None:
-        td = todomanager.update(a.update)
-        modified = True
-    elif a.list:
-        todomanager.listTodos()
-    elif a.detailedlist:
-        todomanager.detailedList()
+    parser_addTodo.add_argument("-t", "--title",
+                                help="title of todo", type=str, nargs='+')
+    parser_addTodo.add_argument("-d", "--description",
+                                default=["No", "description"],
+                                help="description of todo",
+                                type=str, nargs='+')
+    parser_addTodo.add_argument("-p", "--priority",
+                                help="priority of todo",
+                                type=str, default="important")
+    parser_addTodo.add_argument("-s", "--status", help="status of todo",
+                                type=str, default="Not done")
+    parser_addTodo.add_argument("-e", "--enddate", help="enddate of todo",
+                                type=str)
 
-    if modified is True:
-        todomanager.writeFile(td)
+    parser_list = subparsers.add_parser("list", help="help for list todos")
+    parser_list.add_argument("list", help="lists all todos",
+                             action="store_true")
+
+    parser_detailedlist = subparsers.add_parser("detailedlist",
+                                                help="help for detailedlist")
+    parser_detailedlist.add_argument("detailedlist",
+                                     help="lists details of all todos",
+                                     action="store_true")
+
+    parser_update = subparsers.add_parser("update",
+                                          help="help for update todo")
+    parser_update.add_argument("update",
+                               help="updates a todo by index", type=int)
+    parser_update.add_argument("-t", "--title",
+                               help="title of todo", type=str, nargs='+')
+    parser_update.add_argument("-d", "--description",
+                               default=["No", "description"],
+                               help="description of todo",
+                               type=str, nargs='+')
+    parser_update.add_argument("-p", "--priority",
+                               help="priority of todo",
+                               type=str, default="important")
+    parser_update.add_argument("-s", "--status", help="status of todo",
+                               type=str, default="Not done")
+    parser_update.add_argument("-e", "--enddate", help="enddate of todo",
+                               type=str)
+
+    parser_remove = subparsers.add_parser("remove",
+                                          help="help for remove todo")
+    parser_remove.add_argument("remove", help="remove a todo by index",
+                               type=int)
+
+args = parser.parse_args()
+modified = False
+if getattr(args, "title", None):
+    td = todomanager.add()
+    modified = True
+elif getattr(args, "remove", None) or getattr(args, "remove", None) == 0:
+    td = todomanager.remove(args.remove)
+    modified = True
+elif getattr(args, "update", None) or getattr(args, "update", None) == 0:
+    td = todomanager.update(args.update)
+    modified = True
+elif getattr(args, "list", None):
+    print "mystaa"
+    todomanager.list()
+elif getattr(args, "detailedlist", None):
+    todomanager.detailedList()
+
+
+if modified is True:
+    todomanager.writeFile(td)
 
