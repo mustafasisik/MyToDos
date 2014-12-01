@@ -5,6 +5,7 @@ import argparse
 import cPickle as pkl
 from functools import wraps
 
+
 """ bu fonksiyon çağrıldığında bir fonksiyon alır ve onun
 yerine inner function döner. parametre olarak aldığı fonksiyon
 eğer çağrılırsa bunun yerine inner function çalışır"""
@@ -18,78 +19,78 @@ def is_modified(f):
     return innerFunction
 
 
+# todomanager class and functions
 class TodoManager(object):
-    def __init__(self, fileName):
+    def __init__(self, fileName, parse_args):
+        self.parse_args = parse_args
         self.modified = False
         self.fileName = fileName
+        self.todoList = []
+        if os.path.exists(self.fileName):
+            self.todoList = pkl.load(open(self.fileName, "rb"))
 
     def writeFile(self, todoList):
         pkl.dump(todoList, open(self.fileName, "wb"))
-
-    def readFile(self):
-        return pkl.load(open(self.fileName, "rb"))
 
     def create(self):
         todo = {}
         d = ["title", "status", "description", "priority", "enddate"]
         for key in d:
-            if getattr(args, key):
-                todo[key] = getattr(args, key)
+            if hasattr(self.parse_args, key):
+                todo[key] = getattr(self.parse_args, key)
         return todo
 
     @is_modified  # decorator
     def add(self):
-        if os.path.exists(self.fileName):
-            todoList = self.readFile()
-        else:
-            todoList = []
-        todoList.append(self.create())
-        print ("new to do added to index %d" % (len(todoList)-1))
-        return todoList
+        self.todoList.append(self.create())
+        print ("new to do added to index %d" % (len(self.todoList)-1))
+        return self.todoList
 
     def list(self):
-        todoList = self.readFile()
-        print ("title - status")
-        i = 1
-        for todo in todoList:
-            t = " ".join(todo["title"])
+        print ("no - title - status")
+        for i, todo in enumerate(self.todoList):
+            t = todo["title"]
             s = todo["status"]
-            print ("\n%d- %s - %s " % (i, t, s))
-            i += 1
+            print ("\n%d - %s - %s " % ((i+1), t, s))
 
     def detailedList(self):
-        todoList = self.readFile()
-        print ("title - status")
-        i = 1
-        for todo in todoList:
-            t = " ".join(todo["title"])
-            print ("\n%d- %s - %s " % (i, t, todo["status"]))
-            print ("Desc: %s" % " ".join(todo["description"]))
-            print ("priority: %s" % todo["priority"])
-            print ("enddate: %s" % todo["enddate"])
-            i += 1
+        print ("no - title - status - enddate")
+        for i, todo in enumerate(self.todoList):
+            t = todo["title"]
+            s = todo["status"]
+            d = todo["description"]
+            e = todo["enddate"]
+            print("\n%d - %s - %s - %s" % ((i+1), t, s, e))
+            print("Desc: %s " % d)
+            print("priority: %s" % todo["priority"])
 
     @is_modified  # decorator
     def remove(self, index):
-        todoList = self.readFile()
-        assert len(todoList) >= index,\
+        assert 0 < index <= len(self.todoList),\
             print("There is no todo has index %d\n"
                   "Index number should be"
-                  "between(0, %d)" % (index, len(todoList)))
-        todoList.pop(index-1)
+                  "between(0, %d)" % (index, len(self.todoList)))
+        self.todoList.pop(index-1)
         print ("todo removed at index %d" % index)
-        return todoList
+        return self.todoList
 
     @is_modified  # decorator
     def update(self, index):
-        todoList = self.readFile()
         d = ["title", "status", "description", "priority", "enddate"]
         for key in d:
-            if getattr(args, key):
-                todoList[index-1][key] = getattr(args, key)
+            if getattr(self.parse_args, key):
+                self.todoList[index-1][key] = getattr(self.parse_args, key)
         print ("todo at index %s is updated" % index)
-        return todoList
+        return self.todoList
 
+
+#  todo class
+class Todo(object):
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+#  working area
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(prog="MYTODO",
@@ -101,11 +102,11 @@ if __name__ == "__main__":
     parser_addTodo = subparsers.add_parser("add", help="adds new todo")
 
     parser_addTodo.add_argument("-t", "--title",
-                                help="title of todo", type=str, nargs='+')
+                                help="title of todo", type=str)
     parser_addTodo.add_argument("-d", "--description",
-                                default=["No", "description"],
+                                default="No description",
                                 help="description of todo",
-                                type=str, nargs='+')
+                                type=str)
     parser_addTodo.add_argument("-p", "--priority",
                                 help="priority of todo",
                                 type=str, default="important")
@@ -131,11 +132,11 @@ if __name__ == "__main__":
                                           help="help for update todo")
     parser_update.add_argument("update",
                                help="updates a todo by index", type=int)
-    parser_update.add_argument("-t", "--title",
-                               help="title of todo", type=str, nargs='+')
+    parser_update.add_argument("-t", "--title", help="title of todo",
+                               type=str)
     parser_update.add_argument("-d", "--description",
                                help="description of todo",
-                               type=str, nargs='+')
+                               type=str)
     parser_update.add_argument("-p", "--priority",
                                help="priority of todo",
                                type=str)
@@ -151,7 +152,8 @@ if __name__ == "__main__":
                                type=int)
 
     args = parser.parse_args()
-    todomanager = TodoManager("todos.p")
+
+    todomanager = TodoManager("todos.p", args)
 
     if getattr(args, "title", None):
         td = todomanager.add()
@@ -166,4 +168,3 @@ if __name__ == "__main__":
 
     if todomanager.modified:
         todomanager.writeFile(td)
-
