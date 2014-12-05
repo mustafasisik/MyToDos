@@ -1,8 +1,7 @@
 # -*- coding: cp1254 -*-
 from __future__ import print_function
-import os
+import sqlite3
 import argparse
-import cPickle as pkl
 from functools import wraps
 
 
@@ -23,58 +22,41 @@ def is_modified(f):
 class TodoManager(object):
     def __init__(self, todo, parse_args):
         self.parse_args = parse_args
+        self.con = sqlite3.connect("Todos.db")
+        self.cur = self.con.cursor()
         self.modified = False
-        self.todoList = []
         self.todo = todo
-        if os.path.exists(self.fileName):
-            self.todoList = pkl.load(open("todos.p", "rb"))
 
-    def writeFile(self, todoList):
-        pkl.dump(todoList, open("todos.p", "wb"))
+    def create(self):
+        for key, value in self.parse_args.items():
+            setattr(self.todo, key, value)
 
     @is_modified  # decorator
     def add(self):
-        self.todoList.append(self.todo)
-        print ("new to do added to index %d" % (len(self.todoList)-1))
-        return self.todoList
+        self.create()
+        self.cur.execute("""INSERT INTO todos (title, status, description,
+                         priority, enddate) VALUES(?,?,?,?,?)""",
+                         (self.todo.title, self.todo.status,
+                          self.todo.description, self.todo.priority,
+                          self.todo.enddate))
+        self.con.commit()
 
     def list(self):
-        print ("no - title - status")
-        for i, todo in enumerate(self.todoList):
-            t = todo.title
-            s = todo.status
-            print ("\n%d - %s - %s " % ((i+1), t, s))
-
-    def detailedList(self):
-        print ("no - title - status - enddate")
-        for i, todo in enumerate(self.todoList):
-            t = todo.title
-            s = todo.status
-            d = todo.description
-            e = todo.enddate
-            p = todo.priority
-            print("\n%d - %s - %s - %s" % ((i+1), t, s, e))
-            print("Desc: %s " % d)
-            print("priority: %s" % p)
+        self.cur.execute("SELECT * FROM todos")
+        for i in self.cur.fetchall():
+            for j in i:
+                print("mustafa")
 
     @is_modified  # decorator
     def remove(self, index):
-        assert 0 < index <= len(self.todoList),\
-            print("There is no todo has index %d\n"
-                  "Index number should be"
-                  "between(0, %d)" % (index, len(self.todoList)))
-        self.todoList.pop(index-1)
-        print ("todo removed at index %d" % index)
-        return self.todoList
+        self.cur.execute("DELETE FROM todos WHERE id=?", [index])
+        self.con.commit()
 
     @is_modified  # decorator
     def update(self, index):
-        d = ["title", "status", "description", "priority", "enddate"]
-        for key in d:
-            if getattr(self.parse_args, key):
-                self.todoList[index-1][key] = getattr(self.parse_args, key)
-        print ("todo at index %s is updated" % index)
-        return self.todoList
+        for key, value in self.parse_args:
+            sql = "UPDATE todos SET %s=? WHERE id=?" % key
+            self.cur.execute(sql, [value, index])
 
 
 #  todo class
