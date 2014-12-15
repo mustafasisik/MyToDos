@@ -48,20 +48,29 @@ class TodoManager(object):
 
     @is_modified  # decorator
     def remove(self, index):
-        self.cur.execute("DELETE FROM todos WHERE id=?", [index])
-        self.con.commit()
-        print("Todo at index %d removed" %index)
+        self.cur.execute("SELECT * FROM todos WHERE id=?", [index])
+        if self.cur.fetchone():
+            self.cur.execute("DELETE FROM todos WHERE id=?", [index])
+            self.con.commit()
+            print("Todo at index %d removed" %index)
+        else:
+            print("There is no todo at index %d" %index)
 
     @is_modified  # decorator
     def update(self, index):
-        d = ["title", "status", "description", "priority", "enddate"]
-        for key  in d:
-            value = getattr(self.parse_args, key)
-            if value:
-                sql = "UPDATE todos SET %s=? WHERE id=?" % key
-                self.cur.execute(sql, [value, index])
-        self.con.commit()
-        print("Todo at index %d updated" %index)
+        self.cur.execute("SELECT * FROM todos WHERE id=?", [index])
+        if self.cur.fetchone():
+            d = ["title", "status", "description", "priority", "enddate"]
+            for key  in d:
+                value = getattr(self.parse_args, key)
+                if value:
+                    sql = "UPDATE todos SET %s=? WHERE id=?" % key
+                    self.cur.execute(sql, [value, index])
+            self.con.commit()
+            print("Todo at index %d updated" %index)
+        else:
+            print("There is no todo at index %d" %index)
+
 
     def list(self):
         self.cur.execute("SELECT * FROM todos")
@@ -164,7 +173,6 @@ if __name__ == "__main__":
         manager.list()
     elif getattr(args, "detailedlist", None):
         manager.detailedList()
-
 
 
 
