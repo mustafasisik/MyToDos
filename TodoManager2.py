@@ -20,32 +20,26 @@ def is_modified(f):
 
 # todomanager class and functions
 class TodoManager(object):
-    def __init__(self, todo, parse_args):
+    def __init__(self, parse_args):
         self.parse_args = parse_args
         self.con = sqlite3.connect("Todos.db")
         self.cur = self.con.cursor()
         self.modified = False
-        self.todo = todo
 
-    def create(self):
-        for key, value in self.parse_args.items():
-            setattr(self.todo, key, value)
+    def createTable(self):
+        self.cur.execute("""CREATE TABLE todos
+             (id INTEGER PRIMARY KEY,title text, status text, description text,
+              priority text, enddate real)""")
 
-    @is_modified  # decorator
     def add(self):
-        self.create()
         self.cur.execute("""INSERT INTO todos (title, status, description,
                          priority, enddate) VALUES(?,?,?,?,?)""",
-                         (self.todo.title, self.todo.status,
-                          self.todo.description, self.todo.priority,
-                          self.todo.enddate))
+                        (getattr(self.parse_args, "title", "title"),
+                         getattr(self.parse_args, "status", "status"),
+                         getattr(self.parse_args, "description", "descr:"),
+                         getattr(self.parse_args, "priority", "priority"),
+                         getattr(self.parse_args, "enddate", "enddate")))
         self.con.commit()
-
-    def list(self):
-        self.cur.execute("SELECT * FROM todos")
-        for i in self.cur.fetchall():
-            for j in i:
-                print("mustafa")
 
     @is_modified  # decorator
     def remove(self, index):
@@ -58,19 +52,29 @@ class TodoManager(object):
             sql = "UPDATE todos SET %s=? WHERE id=?" % key
             self.cur.execute(sql, [value, index])
 
+    def list(self):
+        self.cur.execute("SELECT * FROM todos")
+        for i in self.cur.fetchall():
+            for j in i:
+                print(j)
+
+    def detailedList(self):
+        self.cur.execute("SELECT * FROM todos")
+        for i in self.cur.fetchall():
+            for j in i:
+                print(j)
+
 
 #  todo class
 class Todo(object):
     def __init__(self):
-        self.title = "title"
-        self.status = "status"
-        self.description = "description"
-        self.priority = "priority"
-        self.enddate = "enddate"
+        self.title = "sampe title"
+        self.status = "sample status"
+        self.description = "sample description"
+        self.priority = "sample priority"
+        self.enddate = "sample enddate"
 
-#  working area
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(prog="MYTODO",
                                      description="Todo Management Ssytem",
                                      epilog="A new look to time management")
@@ -95,7 +99,9 @@ if __name__ == "__main__":
 
     #lists todos
     parser_list = subparsers.add_parser("list", help="help for list todos")
+
     parser_list.add_argument("list", help="lists all todos",
+
                              action="store_true")
 
     #detailed lists todos
@@ -130,19 +136,15 @@ if __name__ == "__main__":
                                type=int)
 
     args = parser.parse_args()
-
-    todomanager = TodoManager("todos.p", args)
+    manager = TodoManager(args)
 
     if getattr(args, "title", None):
-        td = todomanager.add()
+        manager.add()
     elif getattr(args, "remove", None) or getattr(args, "remove", None) == 0:
-        td = todomanager.remove(args.remove)
+        manager.remove(args.remove)
     elif getattr(args, "update", None) or getattr(args, "update", None) == 0:
-        td = todomanager.update(args.update)
+        manager.update(args.update)
     elif getattr(args, "list", None):
-        todomanager.list()
+        manager.list()
     elif getattr(args, "detailedlist", None):
-        todomanager.detailedList()
-
-    if todomanager.modified:
-        todomanager.writeFile(td)
+        manager.detailedList()
