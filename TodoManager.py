@@ -30,19 +30,19 @@ class TodoManager(object):
     # this is used for creating a todo table
     def createTable(self):
         self.cur.execute("""CREATE TABLE todos
-             (id INTEGER PRIMARY KEY,title text, status text, description text, priority text,
-              enddate real)""")
+            (id INTEGER PRIMARY KEY,title text, status text,
+             description text, priority text, enddate real)""")
 
     def add(self):
-        d = ["title", "status", "description","priority","enddate"]
+        d = ["title", "status", "description", "priority", "enddate"]
         for key in d:
             value = getattr(self.parse_args, key)
             setattr(self.todo, key, value)
         self.cur.execute("""INSERT INTO todos (title, status, description,
                          priority, enddate) VALUES(?,?,?,?,?)""",
-                         (self.todo.title,self.todo.status,
-                         self.todo.description, self.todo.priority,
-                         self.todo.enddate))
+                         (self.todo.title, self.todo.status,
+                          self.todo.description, self.todo.priority,
+                          self.todo.enddate))
         self.con.commit()
         print("new todo added")
 
@@ -52,25 +52,20 @@ class TodoManager(object):
         if self.cur.fetchone():
             self.cur.execute("DELETE FROM todos WHERE id=?", [index])
             self.con.commit()
-            print("Todo at index %d removed" %index)
+            print("Todo at index %d removed" % index)
         else:
-            print("There is no todo at index %d" %index)
+            print("There is no todo at index %d" % index)
 
     @is_modified  # decorator
     def update(self, index):
         self.cur.execute("SELECT * FROM todos WHERE id=?", [index])
         if self.cur.fetchone():
-            d = ["title", "status", "description", "priority", "enddate"]
-            for key  in d:
-                value = getattr(self.parse_args, key)
-                if value:
-                    sql = "UPDATE todos SET %s=? WHERE id=?" % key
-                    self.cur.execute(sql, [value, index])
+            sql = "UPDATE todos SET **self.parse_args WHERE id=?"
+            self.cur.execute(sql, [index])
             self.con.commit()
-            print("Todo at index %d updated" %index)
+            print("Todo at index %d updated" % index)
         else:
-            print("There is no todo at index %d" %index)
-
+            print("There is no todo at index %d" % index)
 
     def list(self):
         self.cur.execute("SELECT * FROM todos")
@@ -105,7 +100,7 @@ if __name__ == "__main__":
 
     parser_addTodo = subparsers.add_parser("add", help="adds new todo")
     parser_addTodo.add_argument("add", help="adds new todo",
-                             action="store_true")
+                                action="store_true")
 
     parser_addTodo.add_argument("-t", "--title",
                                 help="title of todo", type=str)
