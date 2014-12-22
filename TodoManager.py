@@ -10,11 +10,14 @@ yerine inner function döner. parametre olarak aldığı fonksiyon
 eğer çağrılırsa bunun yerine inner function çalışır"""
 
 
-def is_modified(f):
+def autoCommit(f):
     @wraps(f)
     def innerFunction(instance, *args):
-        instance.modified = True
-        return f(instance, *args)
+        try:
+            f(instance, *args)
+            return instance.con.commit()
+        except Exception, e:
+            pass
     return innerFunction
 
 
@@ -24,7 +27,6 @@ class TodoManager(object):
         self.parse_args = parse_args
         self.con = sqlite3.connect("Todos.db")
         self.cur = self.con.cursor()
-        self.modified = False
         self.todo = todo
 
     # this is used for creating a todo table
@@ -33,6 +35,7 @@ class TodoManager(object):
              (id INTEGER PRIMARY KEY,title text, status text, description text, priority text,
               enddate real)""")
 
+    @autoCommit  # decorator
     def add(self):
         d = ["title", "status", "description","priority","enddate"]
         for key in d:
@@ -43,20 +46,20 @@ class TodoManager(object):
                          (self.todo.title, self.todo.status,
                           self.todo.description, self.todo.priority,
                           self.todo.enddate))
-        self.con.commit()
         print("new todo added")
 
-    @is_modified  # decorator
+    @autoCommit  # decorator
     def remove(self, index):
         self.cur.execute("SELECT * FROM todos WHERE id=?", [index])
         if self.cur.fetchone():
             self.cur.execute("DELETE FROM todos WHERE id=?", [index])
-            self.con.commit()
             print("Todo at index %d removed" % index)
         else:
             print("There is no todo at index %d" % index)
 
-    @is_modified  # decorator
+
+    """filter reduce kulllanabilirsin"""
+    @autoCommit  # decorator
     def update(self, index):
         self.cur.execute("SELECT * FROM todos WHERE id=?", [index])
         if self.cur.fetchone():
@@ -67,7 +70,6 @@ class TodoManager(object):
             s = ", ".join(setList)
             sql = "UPDATE todos SET %s WHERE id=?" % s
             self.cur.execute(sql, [index])
-            self.con.commit()
             print("Todo at index %d updated" % index)
         else:
             print("There is no todo at index %d" % index)
@@ -173,8 +175,6 @@ if __name__ == "__main__":
         manager.list()
     elif getattr(args, "detailedlist", None):
         manager.detailedList()
-
-
 
 
 
