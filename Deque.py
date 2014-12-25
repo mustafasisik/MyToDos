@@ -1,37 +1,39 @@
 class deque(object):
     def __init__(self):
-        self.myList = []
+        self.data = []
 
     def append(self, arg):
-        self.myList.append(arg)
+        self.data.append(arg)
     def appendleft(self, arg):
-        self.myList.insert(0,arg)
+        self.data.insert(0,arg)
     def clear(self):
-        for i in self.myList:
-            self.myList.remove(i)
+        for i in self.data:
+            self.data.remove(i)
     def count(self, arg):
-        return self.myList.count(arg)
+        return self.data.count(arg)
     def extend(self, argList):
-        self.myList.extend(argList)
-    def extendleft(self, argList):
-        for i in argList:
-            self.myList.insert(0, i)
+        self.data.extend(argList)
+    def extendleft(self, myDeque):
+        for i in myDeque.data:
+            self.data.insert(0, i)
     def maxlen(self):
         pass
     def pop(self):
-        self.myList.pop()
+        self.data.pop()
     def popleft(self):
-        self.myList.pop(0)
+        self.data.pop(0)
     def remove(self, index):
-        self.myList.remove(index)
+        self.data.remove(index)
     def reverse(self, ):
-        self.myList.reverse()
+        self.data.reverse()
     def rotate(self, number):
-        l = len(myList)
+        l = len(data)
         number = number%l
-        part1 = self.myList[-number:]
-        part2 = self.myList[:l-number-1]
+        part1 = self.data[-number:]
+        part2 = self.data[:l-number-1]
         part1.extend(part2)
     def elements(self):
-        for i in self.myList:
+        for i in self.data:
             print i
+    def __str__(self):
+        return self.data.__str__()
