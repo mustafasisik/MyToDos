@@ -132,13 +132,9 @@ if __name__== "__main__":
 
     assert deq.count(5) == doq.count(5), "count function error"
 
-    print deq, doq
-
     from copy import copy
     t = copy(deq)
-    print "t %s" % t
     deq.extendleft(doq)
-    print "t %s" % t
     doq.extendleft(t.data)
 
-    print deq, doq
+    assert deq == doq, "extendleft function error"
